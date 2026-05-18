@@ -4,8 +4,35 @@ export class LevelScene extends Phaser.Scene {
         super('levelScene');
     }
 
+    
+    preload() {
+
+        this.load.audio('red', 'assets/red.mp3');
+        this.load.audio('orange', 'assets/orange.mp3');
+        this.load.audio('yellow', 'assets/yellow.mp3');
+        this.load.audio('green', 'assets/green.mp3');
+        this.load.audio('blue', 'assets/blue.mp3');
+        this.load.audio('purple', 'assets/purple.mp3');
+
+        this.load.audio('redHarmony', 'assets/redHarmony.mp3');
+        this.load.audio('orangeHarmony', 'assets/orangeHarmony.mp3');
+        this.load.audio('yellowHarmony', 'assets/yellowHarmony.mp3');
+        this.load.audio('greenHarmony', 'assets/greenHarmony.mp3');
+        this.load.audio('blueHarmony', 'assets/blueHarmony.mp3');
+        this.load.audio('purpleHarmony', 'assets/purpleHarmony.mp3');
+    }
+
     create() {
 
+        this.harmonyKeys = [
+            'redHarmony',
+            'orangeHarmony',
+            'yellowHarmony',
+            'greenHarmony',
+            'blueHarmony',
+            'purpleHarmony'
+        ];
+                
         this.maxBallSpeed = 850;
 
         this.add.text(40, 30, 'LEVEL 1', {
@@ -22,6 +49,13 @@ export class LevelScene extends Phaser.Scene {
 
         this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        this.bumpKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.bumpStrength = 350;
+
+        this.canBump = true;
+        this.bumpDistance = 25;
+        this.normalBounce = 0.8;
+        this.bumpBounce = 2.2;
 
         this.input.keyboard.once('keydown-ESC', () => {
             this.scene.start('startScene');
@@ -32,9 +66,9 @@ export class LevelScene extends Phaser.Scene {
 
         this.ball.body.setCircle(16);
 
-        this.ball.body.setBounce(3);
+        this.ball.body.setBounce(0.8);
         this.ball.body.setDamping(true);
-        this.ball.body.setDrag(0.92);
+        this.ball.body.setDrag(0.8);
 
         this.ball.body.setCollideWorldBounds(false);
 
@@ -42,7 +76,7 @@ export class LevelScene extends Phaser.Scene {
         this.hasWon = false;
 
         this.gravityAngle = 90;
-        this.gravityStrength = 1500;
+        this.gravityStrength = 500;
 
         this.input.keyboard.once('keydown-SPACE', () => {
             this.hasStarted = true;
@@ -96,16 +130,20 @@ export class LevelScene extends Phaser.Scene {
         let turnAmount = 0;
 
         if (this.keyA.isDown || this.cursors.left.isDown) {
-            turnAmount = -1;
+            turnAmount = 1;
         }
 
         if (this.keyD.isDown || this.cursors.right.isDown) {
-            turnAmount = 1;
+            turnAmount = -1;
         }
 
         if (turnAmount !== 0) {
             this.gravityAngle += turnAmount;
-  this.ball.body.velocity.rotate(Phaser.Math.DegToRad(turnAmount * 0.8));
+            this.ball.body.velocity.rotate(Phaser.Math.DegToRad(turnAmount * 0.8));
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.bumpKey)) {
+            this.bumpBox();
         }
 
         this.physics.velocityFromAngle(
@@ -113,6 +151,7 @@ export class LevelScene extends Phaser.Scene {
             this.gravityStrength,
             this.ball.body.gravity
         );
+
 
         this.ball.body.velocity.limit(this.maxBallSpeed);
 
@@ -125,6 +164,22 @@ export class LevelScene extends Phaser.Scene {
         );
     }
 
+bumpBox() {
+    if (!this.canBump || !this.hasStarted || this.hasWon) {
+        return;
+    }
+
+    this.canBump = false;
+
+    this.ball.body.setBounce(this.bumpBounce);
+
+    this.cameras.main.shake(250, 0.006);
+
+    this.time.delayedCall(500, () => {
+        this.ball.body.setBounce(this.normalBounce);
+        this.canBump = true;
+    });
+}
     hitWall(ball, wall) {
         if (this.hasWon) {
             return;
@@ -137,6 +192,16 @@ export class LevelScene extends Phaser.Scene {
         }
 
         wall.fillColor = this.colorCycle[wall.colorIndex];
+        const noteKeys = [
+        'red',
+        'orange',
+        'yellow',
+        'green',
+        'blue',
+        'purple'
+        ];
+
+        this.sound.play(noteKeys[wall.colorIndex]);
 
         this.checkWin();
     }
@@ -166,6 +231,7 @@ export class LevelScene extends Phaser.Scene {
         }
 
         this.hasWon = true;
+        this.sound.play(this.harmonyKeys[firstColor]);
         this.ball.body.setVelocity(0, 0);
         this.ball.body.gravity.set(0, 0);
 
