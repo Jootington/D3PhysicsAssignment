@@ -23,6 +23,25 @@ export class LevelScene extends Phaser.Scene {
     }
 
     create() {
+        // **** Hud stuff ****
+        this.elapsedTime = 0;
+
+        this.timerText = this.add.text(40, 110, 'Time: 0.00', {
+            fontSize: '24px',
+            color: '#ffffff'
+        });
+
+        this.ratingText = this.add.text(40, 140, 'Rating: --', {
+            fontSize: '24px',
+            color: '#ffffff'
+        });
+
+        this.highScore = localStorage.getItem('level1HighScore');
+
+        this.highScoreText = this.add.text(40, 170, 'Best: ' + (this.highScore || '--'), {
+            fontSize: '24px',
+            color: '#ffffff'
+        });
 
         this.harmonyKeys = [
             'redHarmony',
@@ -122,11 +141,14 @@ export class LevelScene extends Phaser.Scene {
         );
     }
 
-    update() {
+    update(time, delta) {
         if (!this.hasStarted || this.hasWon) {
             return;
         }
 
+        this.elapsedTime += delta / 1000;
+        this.timerText.setText('Time: ' + this.elapsedTime.toFixed(2));
+        
         let turnAmount = 0;
 
         if (this.keyA.isDown || this.cursors.left.isDown) {
@@ -164,22 +186,23 @@ export class LevelScene extends Phaser.Scene {
         );
     }
 
-bumpBox() {
-    if (!this.canBump || !this.hasStarted || this.hasWon) {
-        return;
+    bumpBox() {
+        if (!this.canBump || !this.hasStarted || this.hasWon) {
+            return;
+        }
+
+        this.canBump = false;
+
+        this.ball.body.setBounce(this.bumpBounce);
+
+        this.cameras.main.shake(250, 0.006);
+
+        this.time.delayedCall(500, () => {
+            this.ball.body.setBounce(this.normalBounce);
+            this.canBump = true;
+        });
     }
 
-    this.canBump = false;
-
-    this.ball.body.setBounce(this.bumpBounce);
-
-    this.cameras.main.shake(250, 0.006);
-
-    this.time.delayedCall(500, () => {
-        this.ball.body.setBounce(this.normalBounce);
-        this.canBump = true;
-    });
-}
     hitWall(ball, wall) {
         if (this.hasWon) {
             return;
