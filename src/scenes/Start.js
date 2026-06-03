@@ -46,8 +46,7 @@ export class Start extends Phaser.Scene {
             });
 
             this.input.keyboard.once('keydown-SPACE', () => {
-                this.scene.start('levelScene');
-            });
+            this.scene.start('levelScene', { levelId: 2 });            });
     }
 
     update() {

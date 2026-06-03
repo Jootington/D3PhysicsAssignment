@@ -3,7 +3,36 @@ export class LevelScene extends Phaser.Scene {
     constructor() {
         super('levelScene');
     }
+    
+    init(data) {
+        this.levelId = data.levelId || 1;
 
+        this.levelSettings = {
+            1: {
+                title: 'LEVEL 1',
+                walls: 4,
+                colors: [0xff0000, 0xffa500, 0xffff00],
+                noteKeys: ['red', 'orange', 'yellow'],
+                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony']
+            },
+            2: {
+                title: 'LEVEL 2',
+                walls: 5,
+                colors: [0xff0000, 0xffa500, 0xffff00, 0x00ff00],
+                noteKeys: ['red', 'orange', 'yellow', 'green'],
+                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony', 'greenHarmony']
+            },
+            3: {
+                title: 'LEVEL 3',
+                walls: 6,
+                colors: [0xff0000, 0xffa500, 0xffff00, 0x00ff00, 0x0000ff, 0x800080],
+                noteKeys: ['red', 'orange', 'yellow', 'green', 'blue', 'purple'],
+                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony', 'greenHarmony', 'blueHarmony', 'purpleHarmony']
+            }
+        };
+
+        this.currentLevel = this.levelSettings[this.levelId];
+    }
     
     preload() {
 
@@ -54,7 +83,7 @@ export class LevelScene extends Phaser.Scene {
                 
         this.maxBallSpeed = 850;
 
-        this.add.text(40, 30, 'LEVEL 1', {
+        this.add.text(40, 30, this.currentLevel.title, {
             fontSize: '32px',
             color: '#ffffff'
         });
@@ -95,46 +124,73 @@ export class LevelScene extends Phaser.Scene {
         this.hasWon = false;
 
         this.gravityAngle = 90;
-        this.gravityStrength = 500;
+        this.gravityStrength = 600;
 
         this.input.keyboard.once('keydown-SPACE', () => {
             this.hasStarted = true;
             this.ball.body.setVelocity(220, -180);
         });
+        this.colorCycle = this.currentLevel.colors;
+        // *** DEBUG LOGS ***
+        console.log('levelId:', this.levelId);
+        console.log('colorCycle:', this.colorCycle);
+        console.log('color count:', this.colorCycle.length);
 
-        this.topWall = this.add.rectangle(640, 110, 500, 20, 0xffffff);
-        this.bottomWall = this.add.rectangle(640, 610, 500, 20, 0xffffff);
+        this.noteKeys = this.currentLevel.noteKeys;
+        this.harmonyKeys = this.currentLevel.harmonyKeys;
 
-        this.leftWall = this.add.rectangle(390, 360, 20, 500, 0xffffff);
-        this.rightWall = this.add.rectangle(890, 360, 20, 500, 0xffffff);
+        this.walls = [];
 
-        this.colorCycle = [
-            0xff0000,
-            0xffa500,
-            0xffff00,
-            0x00ff00,
-            0x0000ff,
-            0x800080
-        ];
+        if (this.currentLevel.walls === 4) {
+            this.walls = [
+                this.add.rectangle(640, 110, 500, 20, 0xffffff),
+                this.add.rectangle(640, 610, 500, 20, 0xffffff),
+                this.add.rectangle(390, 360, 20, 500, 0xffffff),
+                this.add.rectangle(890, 360, 20, 500, 0xffffff)
+            ];
+        }
 
-        this.topWall.colorIndex = -1;
-        this.bottomWall.colorIndex = -1;
-        this.leftWall.colorIndex = -1;
-        this.rightWall.colorIndex = -1;
+        if (this.currentLevel.walls === 5) {
+            this.walls = [
+                // top
+                this.add.rectangle(640, 80, 320, 20, 0xffffff),
 
-        this.physics.add.existing(this.topWall, true);
-        this.physics.add.existing(this.bottomWall, true);
-        this.physics.add.existing(this.leftWall, true);
-        this.physics.add.existing(this.rightWall, true);
+                // tiny connectors
+                this.add.rectangle(440, 340, 100, 20, 0xffffff),
+                this.add.rectangle(840, 340, 100, 20, 0xffffff),
+
+                // upper left / right
+                this.add.rectangle(480, 210, 20, 260, 0xffffff),
+                this.add.rectangle(800, 210, 20, 260, 0xffffff),
+
+                // middle left / right shifted inward
+                this.add.rectangle(400, 490, 20, 290, 0xffffff),
+                this.add.rectangle(880, 490, 20, 290, 0xffffff),
+
+                // bottom
+                this.add.rectangle(640, 645, 500, 20, 0xffffff)
+            ];
+        }
+
+        if (this.currentLevel.walls === 6) {
+            this.walls = [
+                this.add.rectangle(640, 120, 220, 20, 0xffffff),
+                this.add.rectangle(770, 220, 20, 200, 0xffffff).setAngle(-35),
+                this.add.rectangle(770, 450, 20, 200, 0xffffff).setAngle(35),
+                this.add.rectangle(640, 550, 220, 20, 0xffffff),
+                this.add.rectangle(510, 450, 20, 200, 0xffffff).setAngle(-35),
+                this.add.rectangle(510, 220, 20, 200, 0xffffff).setAngle(35)
+            ];
+        }
+
+        for (const wall of this.walls) {
+            wall.colorIndex = -1;
+            this.physics.add.existing(wall, true);
+        }
 
         this.physics.add.collider(
             this.ball,
-            [
-                this.topWall,
-                this.bottomWall,
-                this.leftWall,
-                this.rightWall
-            ],
+            this.walls,
             this.hitWall,
             null,
             this
@@ -202,44 +258,29 @@ export class LevelScene extends Phaser.Scene {
             this.canBump = true;
         });
     }
+        hitWall(ball, wall) {
+            if (this.hasWon) {
+                return;
+            }
 
-    hitWall(ball, wall) {
-        if (this.hasWon) {
-            return;
+            wall.colorIndex++;
+
+            if (wall.colorIndex >= this.colorCycle.length) {
+                wall.colorIndex = 0;
+            }
+
+            wall.fillColor = this.colorCycle[wall.colorIndex];
+
+            this.sound.play(this.noteKeys[wall.colorIndex]);
+
+            this.checkWin();
         }
-
-        wall.colorIndex++;
-
-        if (wall.colorIndex >= this.colorCycle.length) {
-            wall.colorIndex = 0;
-        }
-
-        wall.fillColor = this.colorCycle[wall.colorIndex];
-        const noteKeys = [
-        'red',
-        'orange',
-        'yellow',
-        'green',
-        'blue',
-        'purple'
-        ];
-
-        this.sound.play(noteKeys[wall.colorIndex]);
-
-        this.checkWin();
-    }
 
     checkWin() {
         if (this.hasWon) {
             return;
         }
-
-        const walls = [
-            this.topWall,
-            this.bottomWall,
-            this.leftWall,
-            this.rightWall
-        ];
+        const walls = this.walls;
 
         const firstColor = walls[0].colorIndex;
 
