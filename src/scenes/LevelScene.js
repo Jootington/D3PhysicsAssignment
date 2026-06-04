@@ -12,8 +12,8 @@ export class LevelScene extends Phaser.Scene {
                 title: 'LEVEL 1',
                 walls: 4,
                 colors: [0xff0000, 0xffa500, 0xffff00],
-                noteKeys: ['red', 'orange', 'yellow'],
-                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony']
+                noteKeys: ['red', 'purple', 'blue', 'green', 'blue', 'purple'],
+                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony', 'greenHarmony', 'blueHarmony', 'purpleHarmony']
             },
             2: {
                 title: 'LEVEL 2',
@@ -25,9 +25,9 @@ export class LevelScene extends Phaser.Scene {
             3: {
                 title: 'LEVEL 3',
                 walls: 6,
-                colors: [0xff0000, 0xffa500, 0xffff00, 0x00ff00, 0x0000ff, 0x800080],
-                noteKeys: ['red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-                harmonyKeys: ['redHarmony', 'orangeHarmony', 'yellowHarmony', 'greenHarmony', 'blueHarmony', 'purpleHarmony']
+                colors: [0xff0000, 0x800080, 0x0000ff],
+                noteKeys: ['red', 'purple', 'blue'],
+                harmonyKeys: ['redHarmony','purpleHarmony', 'blueHarmony']
             }
         };
 
@@ -103,18 +103,18 @@ export class LevelScene extends Phaser.Scene {
         this.canBump = true;
         this.bumpDistance = 25;
         this.normalBounce = 0.8;
-        this.bumpBounce = 2.2;
+        this.bumpBounce = 1.5;
 
         this.input.keyboard.once('keydown-ESC', () => {
             this.scene.start('startScene');
         });
 
-        this.ball = this.add.circle(640, 360, 16, 0xffffff);
+        this.ball = this.add.circle(640, 360, 10, 0xffffff);
         this.physics.add.existing(this.ball);
 
-        this.ball.body.setCircle(16);
+        this.ball.body.setCircle(10);
 
-        this.ball.body.setBounce(0.8);
+        this.ball.body.setBounce(0.5);
         this.ball.body.setDamping(true);
         this.ball.body.setDrag(0.8);
 
@@ -124,7 +124,7 @@ export class LevelScene extends Phaser.Scene {
         this.hasWon = false;
 
         this.gravityAngle = 90;
-        this.gravityStrength = 600;
+        this.gravityStrength = 500;
 
         this.input.keyboard.once('keydown-SPACE', () => {
             this.hasStarted = true;
@@ -143,28 +143,28 @@ export class LevelScene extends Phaser.Scene {
 
         if (this.currentLevel.walls === 4) {
             this.walls = [
-                this.add.rectangle(640, 110, 500, 20, 0xffffff),
-                this.add.rectangle(640, 610, 500, 20, 0xffffff),
-                this.add.rectangle(390, 360, 20, 500, 0xffffff),
-                this.add.rectangle(890, 360, 20, 500, 0xffffff)
+            this.add.rectangle(640, 185, 350, 20, 0xffffff), // top
+            this.add.rectangle(640, 535, 350, 20, 0xffffff), // bottom
+            this.add.rectangle(465, 360, 20, 350, 0xffffff), // left
+            this.add.rectangle(815, 360, 20, 350, 0xffffff)  // right
             ];
         }
 
         if (this.currentLevel.walls === 5) {
             this.walls = [
                 // top
-                this.add.rectangle(640, 80, 320, 20, 0xffffff),
+                this.add.rectangle(560, 60, 340, 20, 0xffffff),
 
-                // tiny connectors
-                this.add.rectangle(440, 340, 100, 20, 0xffffff),
-                this.add.rectangle(840, 340, 100, 20, 0xffffff),
+                // tiny horizontal
+                this.add.rectangle(800, 335, 180, 20, 0xffffff),
 
-                // upper left / right
-                this.add.rectangle(480, 210, 20, 260, 0xffffff),
-                this.add.rectangle(800, 210, 20, 260, 0xffffff),
+                // upper right
+               this.add.rectangle(720, 195, 20, 260, 0xffffff),
 
-                // middle left / right shifted inward
-                this.add.rectangle(400, 490, 20, 290, 0xffffff),
+                // big left
+                this.add.rectangle(400, 360, 20, 580, 0xffffff),
+
+                // lower right 
                 this.add.rectangle(880, 490, 20, 290, 0xffffff),
 
                 // bottom
@@ -174,12 +174,26 @@ export class LevelScene extends Phaser.Scene {
 
         if (this.currentLevel.walls === 6) {
             this.walls = [
-                this.add.rectangle(640, 120, 220, 20, 0xffffff),
-                this.add.rectangle(770, 220, 20, 200, 0xffffff).setAngle(-35),
-                this.add.rectangle(770, 450, 20, 200, 0xffffff).setAngle(35),
-                this.add.rectangle(640, 550, 220, 20, 0xffffff),
-                this.add.rectangle(510, 450, 20, 200, 0xffffff).setAngle(-35),
-                this.add.rectangle(510, 220, 20, 200, 0xffffff).setAngle(35)
+            // tower roof
+            this.add.rectangle(640, 35, 275, 20, 0xffffff),       
+
+            // tower left horizontal
+            this.add.rectangle(422, 290, 185, 20, 0xffffff),
+            // tower right horizontal
+            this.add.rectangle(858, 290, 185, 20, 0xffffff),
+
+            // tower left vertical wall
+            this.add.rectangle(505, 155, 20, 250, 0xffffff),
+            // tower right vertical wall
+            this.add.rectangle(775, 155, 20, 250, 0xffffff),
+
+            // large left vertical wall
+            this.add.rectangle(340, 470, 20, 370, 0xffffff),
+            // large right vertical wall
+            this.add.rectangle(940, 470, 20, 370, 0xffffff),
+
+            // bottom
+            this.add.rectangle(640, 645, 615, 20, 0xffffff)
             ];
         }
 
@@ -221,7 +235,20 @@ export class LevelScene extends Phaser.Scene {
         }
 
         if (Phaser.Input.Keyboard.JustDown(this.bumpKey)) {
-            this.bumpBox();
+            this.cameras.main.shake(250, 0.006);
+        }
+
+        // increase bounce intensity if below a speed threshold so ball never stops bouncing or comes to a roll
+        const speed = this.ball.body.velocity.length();
+
+        if (speed < 100) {
+            this.ball.body.setBounce(2.5);
+        } else if (speed < 250) {
+            this.ball.body.setBounce(1.5);
+        } else if (this.bumpKey.isDown) {
+        this.ball.body.setBounce(this.bumpBounce);
+        } else {
+            this.ball.body.setBounce(this.normalBounce);
         }
 
         this.physics.velocityFromAngle(
@@ -242,23 +269,8 @@ export class LevelScene extends Phaser.Scene {
         );
     }
 
-    bumpBox() {
-        if (!this.canBump || !this.hasStarted || this.hasWon) {
-            return;
-        }
 
-        this.canBump = false;
-
-        this.ball.body.setBounce(this.bumpBounce);
-
-        this.cameras.main.shake(250, 0.006);
-
-        this.time.delayedCall(500, () => {
-            this.ball.body.setBounce(this.normalBounce);
-            this.canBump = true;
-        });
-    }
-        hitWall(ball, wall) {
+    hitWall(ball, wall) {
             if (this.hasWon) {
                 return;
             }

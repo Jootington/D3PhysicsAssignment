@@ -1,6 +1,7 @@
 import { Start } from './scenes/Start.js';
 
 import { LevelScene } from './scenes/LevelScene.js';
+import { LevelSelectScene } from './scenes/LevelSelectScene.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -13,7 +14,8 @@ const config = {
     pixelArt: false,
     scene: [
         Start,
-        LevelScene
+        LevelScene,
+        LevelSelectScene
     ],
     scale: {
         mode: Phaser.Scale.FIT,

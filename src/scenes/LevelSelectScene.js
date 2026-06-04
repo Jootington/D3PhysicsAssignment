@@ -20,7 +20,7 @@ export class LevelSelectScene extends Phaser.Scene {
 
         level1.on('pointerdown', () => {
             this.scene.start('levelScene', {
-                levelId: 'level1'
+                levelId: '1'
             });
         });
 
@@ -33,7 +33,7 @@ export class LevelSelectScene extends Phaser.Scene {
 
         level2.on('pointerdown', () => {
             this.scene.start('levelScene', {
-                levelId: 'level2'
+                levelId: '2'
             });
         });
 
@@ -46,7 +46,7 @@ export class LevelSelectScene extends Phaser.Scene {
 
         level3.on('pointerdown', () => {
             this.scene.start('levelScene', {
-                levelId: 'level3'
+                levelId: '3'
             });
         });
     }
